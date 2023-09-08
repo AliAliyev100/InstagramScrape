@@ -71,20 +71,34 @@ class InstagramBot:
             print(f"Error: {e}")
 
     def get_posts(self):
-        all_posts_selector = "div.x9f619.xjbqb8w.x78zum5.x168nmei.x13lgxp2.x5pf9jr.xo71vjh.x1n2onr6.x1plvlek.xryxfnj.x1iyjqo2.x2lwn1j.xeuugli.xdt5ytf.xqjyukv.x1qjc9v5.x1oa3qoh.x1nhvcw1" 
-        all_posts = self.get_elements_with_css_selector(all_posts_selector, 0)[1]
         posts_selector = "div._aabd._aa8k._al3l"
-        posts = self.get_elements_with_css_selector(posts_selector,0,all_posts)
+        posts = self.get_elements_with_css_selector(posts_selector,0)
         return posts
     
-    def get_posts_data(self, start_post_index = 0, limit = 12):
-        posts = self.get_posts()[start_post_index:start_post_index + limit]
-        for index, post in enumerate(posts):
-            print("Post no: ", index+1)
-            self.get_post(post)
-            if (index + 1) % 3 == 0:
-                post_height = post.size['height']
-                self.scroll_page(1,post_height)
+    def get_posts_data(self, limit = 12):
+        total_scraped_posts = 0
+        scrollable = True
+        while True:
+            if total_scraped_posts >= limit or scrollable == False:
+                break
+            
+            y_pos_before_loop = self.get_current_y_position()
+            posts = self.get_posts()[total_scraped_posts: limit]
+            for index, post in enumerate(posts):
+                print("Post no: ", index+1)
+                self.get_post(post)
+                total_scraped_posts += 1
+                if (index + 1) % 3 == 0:
+                    post_height = post.size['height']
+                    scrollable = self.scroll_page(1,post_height)
+
+                if total_scraped_posts >= limit or scrollable == False:
+                    break
+            y_pos_after_loop = self.get_current_y_position()
+
+            if(y_pos_before_loop == y_pos_after_loop):
+                break
+
 
     def get_post(self, post):
         first_post_selector = "a.x1i10hfl.xjbqb8w.x6umtig.x1b1mbwd.xaqea5y.xav7gou.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz._a6hd"
@@ -111,7 +125,6 @@ class InstagramBot:
 
         time.sleep(10)
         webdriver.ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
-
 
     def get_post_content(self):
         content_selector = "h1._aacl._aaco._aacu._aacx._aad7._aade"
@@ -141,8 +154,6 @@ class InstagramBot:
         parsed_datetime = datetime.strptime(date_string, format_string)
 
         return parsed_datetime
-
-
 
     def get_post_url(self, post):
         url_selector = ""
@@ -181,3 +192,6 @@ class InstagramBot:
                 return False 
         
         return True 
+    
+    def get_current_y_position(self):
+        return self.driver.execute_script("return window.pageYOffset;")
