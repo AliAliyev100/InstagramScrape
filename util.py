@@ -128,8 +128,11 @@ class InstagramBot:
 
     def get_post_content(self):
         content_selector = "h1._aacl._aaco._aacu._aacx._aad7._aade"
-        content = self.get_elements_with_css_selector(content_selector,0)[0]
-        return content.text
+        content_elements = self.get_elements_with_css_selector(content_selector,0)
+        content = ""
+        if len(content_elements) > 0:
+            content = content_elements[0].text
+        return content
     
     def get_post_likes(self):
         likes_selector = "span.x193iq5w.xeuugli.x1fj9vlw.x13faqbe.x1vvkbs.xt0psk2.x1i0vuye.xvs91rp.x1s688f.x5n08af.x10wh9bi.x1wdrske.x8viiok.x18hxmgj"
@@ -139,9 +142,12 @@ class InstagramBot:
         return likes
 
     def get_post_comments(self):
+        comments = "0"
         comments_selector = "span.x1lliihq.x1plvlek.xryxfnj.x1n2onr6.x193iq5w.xeuugli.x1fj9vlw.x13faqbe.x1vvkbs.x1s928wv.xhkezso.x1gmr53x.x1cpjm7i.x1fgarty.x1943h6x.x1i0vuye.xl565be.x1xlr1w8.x9bdzbf.x10wh9bi.x1wdrske.x8viiok.x18hxmgj"
-        comments = self.get_elements_with_css_selector(comments_selector,0)[1]
-        cleaned_comments_string = comments.text.replace(".", "").strip()
+        comment_elements = self.get_elements_with_css_selector(comments_selector,0)
+        if len(comment_elements) > 0:
+            comments = comment_elements[1].text
+        cleaned_comments_string = comments.replace(".", "").strip()
         comments = int(cleaned_comments_string)
         return comments
 
