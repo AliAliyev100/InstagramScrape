@@ -47,7 +47,7 @@ class InstagramBot:
 
     def get_instagram_main_page(self):
         self.driver.get('https://www.instagram.com/')
-        self.login_facebook("WilliamPhillips8823135", "d6e5Gijg43")
+        self.login_facebook("nofate4640", "berkah12")
         time.sleep(5)
 
     def search_page(self, text):
@@ -99,14 +99,13 @@ class InstagramBot:
             if(y_pos_before_loop == y_pos_after_loop):
                 break
 
-
     def get_post(self, post):
         first_post_selector = "a.x1i10hfl.xjbqb8w.x6umtig.x1b1mbwd.xaqea5y.xav7gou.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz._a6hd"
         first_post = self.get_elements_with_css_selector(first_post_selector,0,post)[0]
         time.sleep(1)
         post_url = first_post.get_attribute("href")
         self.hover_element(first_post)
-        post_comments_count = self.get_post_comments()
+        post_comments_count = self.get_post_comments_count()
         time.sleep(3)
         self.click_element(first_post)
 
@@ -141,7 +140,7 @@ class InstagramBot:
         likes = int(cleaned_like_count)
         return likes
 
-    def get_post_comments(self):
+    def get_post_comments_count(self):
         comments = "0"
         comments_selector = "span.x1lliihq.x1plvlek.xryxfnj.x1n2onr6.x193iq5w.xeuugli.x1fj9vlw.x13faqbe.x1vvkbs.x1s928wv.xhkezso.x1gmr53x.x1cpjm7i.x1fgarty.x1943h6x.x1i0vuye.xl565be.x1xlr1w8.x9bdzbf.x10wh9bi.x1wdrske.x8viiok.x18hxmgj"
         comment_elements = self.get_elements_with_css_selector(comments_selector,0)
@@ -201,3 +200,69 @@ class InstagramBot:
     
     def get_current_y_position(self):
         return self.driver.execute_script("return window.pageYOffset;")
+    
+    def get_post_comments(self,post_url):
+        self.driver.get(post_url)
+
+
+        time.sleep(15)
+        comments_selector = "div.x9f619.xjbqb8w.x78zum5.x168nmei.x13lgxp2.x5pf9jr.xo71vjh.xsag5q8.xz9dl7a.x1uhb9sk.x1plvlek.xryxfnj.x1c4vz4f.x2lah0s.x1q0g3np.xqjyukv.x1qjc9v5.x1oa3qoh.x1nhvcw1"
+        comments = self.get_elements_with_css_selector(comments_selector,0)
+        cnt = 1
+        while True:
+            print(cnt)
+            element1 = comments[-1]
+            self.driver.execute_script("arguments[0].scrollIntoView();", element1)
+            time.sleep(3)
+            comments = self.get_elements_with_css_selector(comments_selector,0)
+            element2 = comments[-1]
+            if(element1 == element2):
+                break
+            time.sleep(5)
+            cnt+=1
+            
+
+
+        for comment in comments:
+            comment_related_elements_selector = "span.x1lliihq.x193iq5w.x6ikm8r.x10wlt62.xlyipyv.xuxw1ft"
+            comment_related_elements = self.get_elements_with_css_selector(comment_related_elements_selector,0,comment)
+            author_and_text_elements_selector = "span.x1lliihq.x1plvlek.xryxfnj.x1n2onr6.x193iq5w.xeuugli.x1fj9vlw.x13faqbe.x1vvkbs.x1s928wv.xhkezso.x1gmr53x.x1cpjm7i.x1fgarty.x1943h6x.x1i0vuye.xvs91rp.xo1l8bm.x5n08af.x10wh9bi.x1wdrske.x8viiok.x18hxmgj"
+            auther_and_text_elements = self.get_elements_with_css_selector(author_and_text_elements_selector,0,comment)
+            comment_datetime_selector = "time.x76ihet.xwmqs3e.x112ta8.xxxdfa6.x1roi4f4.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1n2onr6"
+
+            if len(comment_related_elements) == 0:
+                continue
+            if len(comment_related_elements) == 1 and comment_related_elements[0].text == "Çevirisine bak":
+                continue
+            if len(auther_and_text_elements) < 2:
+                continue
+            likes = None
+
+            format_string = "%Y-%m-%dT%H:%M:%S.%fZ"
+
+            date_element = self.get_elements_with_css_selector(comment_datetime_selector,0,comment)[0]
+            date_string = date_element.get_attribute("datetime")
+            parsed_datetime = datetime.strptime(date_string, format_string)
+
+            for element in comment_related_elements:
+                text = element.text
+                if "beğenme" in text:
+                    likes = text.replace("beğenme", "").strip()
+
+            author = auther_and_text_elements[0].text
+            text = auther_and_text_elements[1].text
+            print("Author: ", author, "\nText: ", text, "\nlikes: ", likes, "\ndatetime:" , parsed_datetime, "\n")
+
+
+
+
+        # comments_container_selector = "div.x5yr21d.xw2csxc.x1odjw0f.x1n2onr6"
+        # comments_container_elements = self.get_elements_with_css_selector(comments_container_selector)
+        # if len (comments_container_elements) < 1:
+        #     print("No")
+        #     return
+        # comments_container_element = comments_container_elements[0]
+        # container_element_selector = "div.x5yr21d.xw2csxc.x1odjw0f.x1n2onr6"
+        # container = self.get_elements_with_css_selector(container_element_selector)
+        # self.driver.execute_script("arguments[0].scrollTop += 500;", container)
+            
